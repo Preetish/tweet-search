@@ -1,14 +1,16 @@
 //inject the twitterService into the controller
-app.controller('TwitterController', function($scope, $q, twitterService) {
+app.controller('TwitterController', function($scope,$q, twitterService) {
 
     $scope.tweets=[]; //array of tweets
-    
+
     twitterService.initialize();
 
     //using the OAuth authorization result get the latest 20 tweets from twitter for the user
     $scope.refreshTimeline = function(maxId) {
         twitterService.getLatestTweets(maxId).then(function(data) {
             $scope.tweets = $scope.tweets.concat(data);
+        },function(){
+            $scope.rateLimitError = true;
         });
     }
 
@@ -20,9 +22,11 @@ app.controller('TwitterController', function($scope, $q, twitterService) {
                 $('#connectButton').fadeOut(function(){
                     $('#getTimelineButton, #signOut').fadeIn();
                     $scope.refreshTimeline();
-					$scope.connectedTwitter = true;
+					          $scope.connectedTwitter = true;
                 });
-            }
+            } else {
+
+			         }
         });
     }
 
@@ -32,7 +36,7 @@ app.controller('TwitterController', function($scope, $q, twitterService) {
         $scope.tweets.length = 0;
         $('#getTimelineButton, #signOut').fadeOut(function(){
             $('#connectButton').fadeIn();
-			$scope.connectedTwitter = false;
+			$scope.$apply(function(){$scope.connectedTwitter=false})
         });
     }
 
@@ -40,6 +44,7 @@ app.controller('TwitterController', function($scope, $q, twitterService) {
     if (twitterService.isReady()) {
         $('#connectButton').hide();
         $('#getTimelineButton, #signOut').show();
+     		$scope.connectedTwitter = true;
         $scope.refreshTimeline();
     }
 
